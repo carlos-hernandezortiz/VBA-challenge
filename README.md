@@ -1,2 +1,3 @@
 # VBA-challenge
-2nd Bootcamp Homerwork-VBA programming
+2nd Bootcamp Homework-VBA programming
+Stock Market Activity
