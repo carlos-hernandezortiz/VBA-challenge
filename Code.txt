@@ -1,0 +1,133 @@
+Sub Perform_Calculations_Carlos()
+'Loop at all worksheets
+For Each ws In Worksheets
+'This part of the code is dedicated to get the total rows of the page starting from A2.
+    Dim total_rows As LongLong
+    total_rows = ws.Range("A2", ws.Range("A1").End(xlDown).End(xlDown).End(xlUp)).Rows.Count
+    
+'Writing Ticker (L1), Yearly Change (M1), Percent Change(N1), Total Stock Volume (O1)
+    ws.Range("L1").Value = "Ticker"
+    ws.Range("M1").Value = "Yearly Change"
+    ws.Range("N1").Value = "Percent Change"
+    ws.Range("O1").Value = "Total Stock Volume"
+    
+'This part of the code is dedicated to loop through all the records of the sheet.
+Dim current_ticker As String
+Dim current_opening_price As Double
+Dim current_closing_price As Double
+Dim current_yearly_change As Double
+Dim current_percent_change As Double
+Dim current_total_stock As LongLong
+Dim current_counter As Long
+Dim current_line As Long
+
+current_counter = 0
+current_line = 1
+
+For i = 2 To total_rows + 1
+    
+    If current_counter = 0 Then
+        current_line = current_line + 1
+    'Getting the value of current_ticker
+        current_ticker = ws.Cells(i, 1).Value
+        ws.Cells(current_line, 12).Value = current_ticker
+    'Getting the value of opening price
+        current_opening_price = ws.Cells(i, 3).Value
+    'Getting the line to write
+    End If
+    'Sum of current total stock
+    current_total_stock = current_total_stock + ws.Cells(i, 7)
+    current_counter = current_counter + 1
+    'Revise if next value is different
+    If ((ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value) Or IsEmpty(ws.Cells(i + 1, 1))) Then
+        'Getting closing price
+        current_closing_price = ws.Cells(i, 6).Value
+        'Calculating yearly change
+        current_yearly_change = current_closing_price - current_opening_price
+        ws.Cells(current_line, 13).Value = current_yearly_change
+        'Yearly Change Formatting
+        If current_yearly_change >= 0 Then
+            ws.Cells(current_line, 13).Interior.ColorIndex = 4
+        Else
+            ws.Cells(current_line, 13).Interior.ColorIndex = 3
+        End If
+        'Calculating percent change
+        If current_opening_price <> 0 Then
+        current_percent_change = current_yearly_change / current_opening_price
+        ws.Cells(current_line, 14).Value = FormatPercent(current_percent_change)
+        Else
+        ws.Cells(current_line, 14).Value = 0
+        End If
+        
+        
+        'Assigning total value
+        ws.Cells(current_line, 15).Value = current_total_stock
+        'Cleansing values
+        current_counter = 0
+        current_total_stock = 0
+        
+    End If
+    
+Next i
+
+'Code snippet for Greatest % Change, Greatest % Decrease, Greatest Total Volume
+Dim result_rows As LongLong
+Dim highest_percentage_increase, lowest_percentage_decrease As Double
+Dim highest_ticker, lowest_ticker, max_vol_ticker As String
+Dim highest_total_volume As LongLong
+
+highest_percentage_increase = ws.Range("N2").Value
+lowest_percentage_decrease = ws.Range("N2").Value
+highest_ticker = ws.Range("L2").Value
+lowest_ticker = ws.Range("L2").Value
+highest_total_volume = ws.Range("O2").Value
+max_vol_ticker = ws.Range("L2").Value
+
+'Getting all the available groups
+result_rows = ws.Range("L2", ws.Range("L1").End(xlDown).End(xlDown).End(xlUp)).Rows.Count
+For i = 2 To result_rows + 1
+    'Getting highest percentage increase
+    If (ws.Cells(i, 14).Value > highest_percentage_increase) Then
+        highest_percentage_increase = ws.Cells(i, 14).Value
+        highest_ticker = ws.Cells(i, 12).Value
+    End If
+    'Getting lowest decrease
+    If (ws.Cells(i, 14).Value < lowest_percentage_decrease) Then
+        lowest_percentage_decrease = ws.Cells(i, 14).Value
+        lowest_ticker = ws.Cells(i, 12).Value
+    End If
+    'Getting highest total volume
+    If (ws.Cells(i, 15).Value > highest_total_volume) Then
+        highest_total_volume = ws.Cells(i, 15).Value
+        max_vol_ticker = ws.Cells(i, 12).Value
+    End If
+Next i
+
+
+ws.Range("R1").Value = "Ticker"
+ws.Range("S1").Value = "Value"
+ws.Range("Q2").Value = "Greatest % increase"
+ws.Range("Q3").Value = "Greatest % decrease"
+ws.Range("Q4").Value = "Greatest Total Volume"
+ws.Range("R2").Value = highest_ticker
+ws.Range("S2").Value = FormatPercent(highest_percentage_increase)
+ws.Range("R3").Value = lowest_ticker
+ws.Range("S3").Value = FormatPercent(lowest_percentage_decrease)
+ws.Range("R4").Value = max_vol_ticker
+ws.Range("S4").Value = highest_total_volume
+
+
+Next ws
+    
+End Sub
+
+
+'Sub test()
+'    Dim sh As Worksheet
+'    Set sh = ThisWorkbook.Sheets("Sheet1")
+'
+'   Dim k As Long
+'    k = sh.Range("A1", sh.Range("A1").End(xlDown).End(xlDown).End(xlUp)).Rows.Count
+'End Sub
+
+
